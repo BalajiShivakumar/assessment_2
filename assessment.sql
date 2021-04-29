@@ -33,34 +33,23 @@ select * from titles
 
 
 -----4
-create function fn_PrintingTax(@auid varchar(20))
-  returns @TotalTax Table
-  (
-     Bname varchar(15), 
-	 Totalamount float,
-	 Tax float)
-	as
-	begin
-	declare
-		@total float,
-		@tax float,
-		@taxPayable float,
-		@Bname varchar(15)
-		  set @total = (select price from titles ts join authors au
-		  on ts.title_id = au.au_id
-		  where ts.title_id = @auid )
-		  if(@total<10)
-			set @tax = 2
-		  else if(@total>10 and @total<20)
-			set @tax = 5
-		  else if(@total>20 and @total<30)
-			set @tax = 6
-		  else 
-			set @tax = 7.5
-		  set @taxPayable = @total*@tax/100
-		  set @Bname = (select name from tblEmployee_details where id = @auid)
-		  insert into @TotalTax values(@Bname,@total,@taxPayable)
-		  return
-	end
+create function fn_PrintingTax(@quantity int)
+returns float
+as
+begin
+declare
+@tax int
+if(@quantity < 10)
+set @tax=2
+else if(@quantity>=10 and @quantity<=20)
+set @tax=5
+else if(@quantity>=21 and @quantity<=30)
+set @tax=6
+else
+set @tax=7.5
+return @tax
+end
+
+select qty,dbo. fn_PrintingTax(qty) 'Tax' from sales
 
 select * from dbo.fn_PrintingTax(100)
